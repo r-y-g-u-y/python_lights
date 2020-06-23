@@ -27,7 +27,6 @@ def check_config(write=False, cip=None, cpt=None):
     if(write):
         with open("cfg/config.cfg", "w") as configs:
             configs.write(cip)
-            configs.write("\n")
             configs.write(cpt)
         
     else:
@@ -41,17 +40,57 @@ def check_config(write=False, cip=None, cpt=None):
 def save_config():
     check_config(True, com_ip, com_port)
 
-def load_config():
+def load_config(ipDialog=None):
     check_config(False)
+    if ipDialog is not None:
+        ipDialog.destroy()
 
+
+def open_IP(window):
+    ipDialog = tk.Toplevel(window)
+    ipDialog.iconbitmap(BITMAP)
+    ipDialog.overrideredirect(True)
+    ipDialog.configure(bg=BGCOLOR)
+    ipDialog.resizable(width=False, height=False)
+    xh = window.winfo_screenwidth()/2 - 75
+    yh = window.winfo_screenheight()/2 - 65
+    ipDialog.geometry("150x130+%d+%d" %(xh, yh) )
+
+    lbl_setIP = tk.Label(ipDialog, text="Set IP", bg=BGCOLOR, fg=FGCOLOR)
+    txt_setIP = tk.Text(ipDialog, height=1, width=15)
+    lbl_setPt = tk.Label(ipDialog, text="Set Port", bg=BGCOLOR, fg=FGCOLOR)
+    txt_setPt = tk.Text(ipDialog, height=1, width=15)
+    btn_submit = tk.Button(ipDialog, text="Submit", command=lambda:ip_submit(ipDialog, txt_setIP, txt_setPt), bg=BGCOLOR, fg=FGCOLOR)
+    btn_ldcfg = tk.Button(ipDialog, text="Load Config", command=lambda:load_config(ipDialog), bg=BGCOLOR, fg=FGCOLOR)
+
+    txt_setIP.insert(tk.END, com_ip)
+    txt_setPt.insert(tk.END, com_port)
+
+    lbl_setIP.pack(anchor="nw")
+    txt_setIP.pack()
+    lbl_setPt.pack(anchor="nw")
+    txt_setPt.pack()
+    btn_submit.pack(side="right")
+    btn_ldcfg.pack(side="left")
+
+    
+
+def ip_submit(dialog, iptxt, ipprt):
+    global com_ip
+    global com_port
+    com_ip = iptxt.get("1.0", tk.END)
+    com_port = ipprt.get("1.0", tk.END)
+    dialog.destroy()
 
 
 def main():
     window = tk.Tk()
-    
+
     window.title("LED Colour Picker v%s" %VERSION)
     window.iconbitmap(BITMAP)
-    window.geometry("640x360")
+    xh = window.winfo_screenwidth()/2 - WIDTH
+    yh = window.winfo_screenheight()/2 - HEIGHT
+    window.geometry("640x360+%d+%d" %(xh, yh))
     window.configure(background=BGCOLOR)
     window.resizable(width=False, height=False)
     for i in range(2):
@@ -94,12 +133,18 @@ def main():
     )
     btn_saveConfig.place(relx=0, rely=0.9, anchor="sw")
 
-    btn_loadConfig = tk.Button(
+    btn_ipSettings = tk.Button(
         master=frame_cButtons,
-        text="Load Config",
-        command=load_config
+        text="IP Settings",
+        command=open_IP
     )
-    btn_loadConfig.place(relx=0.5, rely=0.9, anchor="s")
+
+    btn_setIP = tk.Button(
+        master=frame_cButtons,
+        text="Set Network",
+        command=lambda:open_IP(window)
+    )
+    btn_setIP.place(relx=0.5, rely=0.9, anchor="s")
     
 
     #color = askcolor()
