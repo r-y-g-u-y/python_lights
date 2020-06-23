@@ -42,9 +42,8 @@ def save_config():
     check_config(True, com_ip, com_port)
 
 def load_config():
-    print(com_ip)
     check_config(False)
-    print(com_ip)
+
 
 
 def main():
