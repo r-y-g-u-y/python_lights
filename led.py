@@ -4,20 +4,18 @@ class rgb:
     g = 0
     b = 0
     def __init__(self, red=0, green=0, blue=0):
-        r = red
-        g = green
-        b = blue
+        self.r = int(round(red))
+        self.g = int(round(green))
+        self.b = int(round(blue))
     def get(self):
-        return [r, g, b]
+        return [self.r, self.g, self.b]
 
     def getHex(self):
-        return [hex(r), hex(g), hex(b)]
+        return [hex(self.r), hex(self.g), hex(self.b)]
         
     def getHexAsStr(self):
-        return "%s%s%s" %(hex(r)[2:], hex(g)[2:], hex(b)[2:])
+        return "%s%s%s" %(hex(self.r)[2:], hex(self.g)[2:], hex(self.b)[2:])
     def __repr__(self):
         return (
-            "red   = %d\n" +
-            "green = %d\n" +
-            "blue  = %d\n" % (r, g, b)
+            "red   = %d\ngreen = %d\nblue  = %d\n" % (self.r, self.g, self.b)
         )
