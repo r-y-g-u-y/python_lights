@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter.colorchooser import askcolor
 from os.path import isfile
+from led import rgb
 
 
 #   CONSTANTS
@@ -22,6 +23,11 @@ MODES = [
 com_ip      =   "192.168.0.100"
 com_port    =   "55555"
 modeSelect  =   None
+colourA     =   rgb()
+colourB     =   rgb()
+
+
+
 
 def check_config(write=False, cip=None, cpt=None):
     if(write):
@@ -37,14 +43,47 @@ def check_config(write=False, cip=None, cpt=None):
                 com_ip = configs.readline()
                 com_port = configs.readline()
 
-def save_config():
-    check_config(True, com_ip, com_port)
+def helper_modify_label(label):
+    label.config(bg="#%s" %(colourA.getHexAsStr()))
 
-def load_config(ipDialog=None):
+
+#BUTTON HANDLERS
+
+def handler_save_config(msg):
+    check_config(True, com_ip, com_port)
+    
+
+def handler_load_config(ipDialog=None):
     check_config(False)
     if ipDialog is not None:
         ipDialog.destroy()
 
+def handler_ip_submit(dialog, iptxt, ipprt):
+    global com_ip
+    global com_port
+    com_ip = iptxt.get("1.0", tk.END)
+    com_port = ipprt.get("1.0", tk.END)
+    dialog.destroy()
+
+def handler_set_colour1(label):
+    temp_colour = askcolor()
+    global colourA
+    colourA = rgb(temp_colour[0][0], temp_colour[0][1], temp_colour[0][2])
+    helper_modify_label(label)
+    pass
+
+def handler_set_colour2(window):
+    pass
+
+def handler_submit():
+    pass
+
+
+#   OPEN_IP
+#   
+#   Opens the IP settings Dialog
+#
+#   window: the top level window
 
 def open_IP(window):
     ipDialog = tk.Toplevel(window)
@@ -60,8 +99,8 @@ def open_IP(window):
     txt_setIP = tk.Text(ipDialog, height=1, width=15)
     lbl_setPt = tk.Label(ipDialog, text="Set Port", bg=BGCOLOR, fg=FGCOLOR)
     txt_setPt = tk.Text(ipDialog, height=1, width=15)
-    btn_submit = tk.Button(ipDialog, text="Submit", command=lambda:ip_submit(ipDialog, txt_setIP, txt_setPt), bg=BGCOLOR, fg=FGCOLOR)
-    btn_ldcfg = tk.Button(ipDialog, text="Load Config", command=lambda:load_config(ipDialog), bg=BGCOLOR, fg=FGCOLOR)
+    btn_submit = tk.Button(ipDialog, text="Submit", command=lambda:handler_ip_submit(ipDialog, txt_setIP, txt_setPt), bg=BGCOLOR, fg=FGCOLOR)
+    btn_ldcfg = tk.Button(ipDialog, text="Load Config", command=lambda:handler_load_config(ipDialog), bg=BGCOLOR, fg=FGCOLOR)
 
     txt_setIP.insert(tk.END, com_ip)
     txt_setPt.insert(tk.END, com_port)
@@ -72,16 +111,6 @@ def open_IP(window):
     txt_setPt.pack()
     btn_submit.pack(side="right")
     btn_ldcfg.pack(side="left")
-
-    
-
-def ip_submit(dialog, iptxt, ipprt):
-    global com_ip
-    global com_port
-    com_ip = iptxt.get("1.0", tk.END)
-    com_port = ipprt.get("1.0", tk.END)
-    dialog.destroy()
-
 
 def main():
     window = tk.Tk()
@@ -126,18 +155,30 @@ def main():
     frame_cButtons = tk.Frame(master=window, width=WIDTH/2, height=HEIGHT/2, bg=BGCOLOR)
     frame_cButtons.grid(row=1, column=1)
 
+    #   INITIALIZE COLOUR BUTTON
+    frame_colorchooser = tk.Frame(master=window, width=WIDTH/2, height=HEIGHT/2, bg=BGCOLOR)
+    frame_colorchooser.grid(row=0, column=1)
+
+
+    lbl_currentColour1 = tk.Label(master=frame_colorchooser, width=8)
+    btn_setColour = tk.Button(
+        master=frame_colorchooser,
+        text="Set Colour",
+        command=lambda:handler_set_colour1(lbl_currentColour1)
+    )
+
+    lbl_currentColour1.place(anchor='center', relx=0.3, rely=0.3)
+    btn_setColour.place(anchor='center', relx=0.6, rely=0.3)
+
+
     btn_saveConfig = tk.Button(
         master=frame_cButtons,
         text="Save Config",
-        command=save_config
+        command=lambda:handler_save_config(modeSelect)
     )
     btn_saveConfig.place(relx=0, rely=0.9, anchor="sw")
 
-    btn_ipSettings = tk.Button(
-        master=frame_cButtons,
-        text="IP Settings",
-        command=open_IP
-    )
+
 
     btn_setIP = tk.Button(
         master=frame_cButtons,
@@ -150,7 +191,7 @@ def main():
     #color = askcolor()
     #print(color)
     
-
+    check_config(False, com_ip, com_port)
     window.mainloop()
 
 
