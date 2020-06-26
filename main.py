@@ -23,10 +23,8 @@ MODES = [
 com_ip      =   "192.168.0.100"
 com_port    =   "55555"
 modeSelect  =   None
-colourA     =   rgb()
-colourB     =   rgb()
-
-
+colour1     =   rgb()
+colour2     =   rgb()
 
 
 def check_config(write=False, cip=None, cpt=None):
@@ -43,8 +41,8 @@ def check_config(write=False, cip=None, cpt=None):
                 com_ip = configs.readline()
                 com_port = configs.readline()
 
-def helper_modify_label(label):
-    label.config(bg="#%s" %(colourA.getHexAsStr()))
+def helper_modify_label(label, colour):
+    label.config(bg="#%s" %(colour.getHexAsStr()))
 
 
 #BUTTON HANDLERS
@@ -66,14 +64,26 @@ def handler_ip_submit(dialog, iptxt, ipprt):
     dialog.destroy()
 
 def handler_set_colour1(label):
-    temp_colour = askcolor()
-    global colourA
-    colourA = rgb(temp_colour[0][0], temp_colour[0][1], temp_colour[0][2])
-    helper_modify_label(label)
+    handler_set_colour(label, 1)
     pass
 
-def handler_set_colour2(window):
+def handler_set_colour2(label):
+    handler_set_colour(label, 2)
     pass
+
+def handler_set_colour(label, btn_num):
+    temp_colour = askcolor()
+    
+    if btn_num == 1:
+        global colour1
+        colour1 = rgb(temp_colour[0][0], temp_colour[0][1], temp_colour[0][2])
+        helper_modify_label(label, colour1)
+    else:
+        global colour2
+        colour2 = rgb(temp_colour[0][0], temp_colour[0][1], temp_colour[0][2])
+        helper_modify_label(label, colour2)
+
+    
 
 def handler_submit():
     pass
@@ -163,7 +173,7 @@ def main():
     lbl_currentColour1 = tk.Label(master=frame_colorchooser, width=8)
     btn_setColour = tk.Button(
         master=frame_colorchooser,
-        text="Set Colour",
+        text="Set Colour 1",
         command=lambda:handler_set_colour1(lbl_currentColour1)
     )
 
@@ -171,12 +181,24 @@ def main():
     btn_setColour.place(anchor='center', relx=0.6, rely=0.3)
 
 
+    lbl_currentColour2 = tk.Label(master=frame_colorchooser, width=8)
+    btn_setColour2 = tk.Button(
+        master=frame_colorchooser,
+        text="Set Colour 2",
+        command=lambda:handler_set_colour2(lbl_currentColour2)
+    )
+
+    lbl_currentColour2.place(anchor='center', relx=0.3, rely=0.6)
+    btn_setColour2.place(anchor='center', relx=0.6, rely=0.6)
+
+
+
     btn_saveConfig = tk.Button(
         master=frame_cButtons,
         text="Save Config",
         command=lambda:handler_save_config(modeSelect)
     )
-    btn_saveConfig.place(relx=0, rely=0.9, anchor="sw")
+    btn_saveConfig.place(relx=0.2, rely=0.9, anchor="s", width=80)
 
 
 
@@ -185,8 +207,14 @@ def main():
         text="Set Network",
         command=lambda:open_IP(window)
     )
-    btn_setIP.place(relx=0.5, rely=0.9, anchor="s")
+    btn_setIP.place(relx=0.5, rely=0.9, anchor="s", width=80)
     
+    btn_submit = tk.Button(
+        master=frame_cButtons,
+        text="Submit",
+        command=lambda:handler_submit
+    )
+    btn_submit.place(relx=0.8, rely=0.9, anchor="s", width=80)
 
     #color = askcolor()
     #print(color)
