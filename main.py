@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter.colorchooser import askcolor
 from os.path import isfile
 from led import rgb
+from com import send
 
 
 #   CONSTANTS
@@ -59,8 +60,8 @@ def handler_load_config(ipDialog=None):
 def handler_ip_submit(dialog, iptxt, ipprt):
     global com_ip
     global com_port
-    com_ip = iptxt.get("1.0", tk.END)
-    com_port = ipprt.get("1.0", tk.END)
+    com_ip = iptxt.get("1.0", "1.15").strip()
+    com_port = ipprt.get("1.0", "1.5").strip()
     dialog.destroy()
 
 def handler_set_colour1(label):
@@ -83,9 +84,8 @@ def handler_set_colour(label, btn_num):
         colour2 = rgb(temp_colour[0][0], temp_colour[0][1], temp_colour[0][2])
         helper_modify_label(label, colour2)
 
-    
-
-def handler_submit():
+def handler_submit(cmdStr):
+    send(colour1, colour2, cmdStr, com_ip, com_port)
     pass
 
 
@@ -212,7 +212,7 @@ def main():
     btn_submit = tk.Button(
         master=frame_cButtons,
         text="Submit",
-        command=lambda:handler_submit
+        command=lambda:handler_submit(modeSelect.get())
     )
     btn_submit.place(relx=0.8, rely=0.9, anchor="s", width=80)
 
