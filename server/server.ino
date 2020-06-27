@@ -56,6 +56,7 @@ void setup()
 
 void loop()
 {
+  
   int packetSize = Udp.parsePacket();
   if (packetSize)
   {
@@ -64,5 +65,7 @@ void loop()
     Serial.printf("UDP packet contents: %s\n", incomingPacket);
 
     init_light_struct(incomingPacket, &currentCmd);
+    parse_command(&currentCmd);
+    delay(1000);
   }
 }
