@@ -25,8 +25,8 @@ MODES = [
 com_ip      =   "192.168.0.100"
 com_port    =   "55555"
 modeSelect  =   None
-colour1     =   rgb()
-colour2     =   rgb()
+colour1     =   rgb(255, 255, 255)
+colour2     =   rgb(255, 255, 255)
 
 
 def check_config(write=False, cip=None, cpt=None):
