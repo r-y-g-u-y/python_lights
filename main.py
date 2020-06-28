@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter.colorchooser import askcolor
+from tkinter.messagebox import showinfo
 from os.path import isfile
 from led import rgb
 from com import send
@@ -31,7 +32,7 @@ colour2     =   rgb()
 def check_config(write=False, cip=None, cpt=None):
     if(write):
         with open("cfg/config.cfg", "w") as configs:
-            configs.write(cip)
+            configs.write(cip + "\n")
             configs.write(cpt)
         
     else:
@@ -39,21 +40,31 @@ def check_config(write=False, cip=None, cpt=None):
             with open("cfg/config.cfg", "r") as configs:
                 global com_ip
                 global com_port
-                com_ip = configs.readline()
+                com_ip = configs.readline()[:-1] #get rid of newline character
                 com_port = configs.readline()
 
 def helper_modify_label(label, colour):
     label.config(bg="#%s" %(colour.getHexAsStr()))
+
+def create_dialog(message):
+    showinfo("LED Colour Picker v%s" %VERSION, message)
 
 
 #BUTTON HANDLERS
 
 def handler_save_config(msg):
     check_config(True, com_ip, com_port)
-    
+    create_dialog("Config has been saved successfully!")
+
+def handler_create_scaleable(scale):
+    scale.place(relx=0.5,rely=0.5,anchor='center')
+
+def handler_destroy_scaleable(scale):
+    scale.place_forget()
 
 def handler_load_config(ipDialog=None):
     check_config(False)
+    create_dialog("Config has been loaded successfully!")
     if ipDialog is not None:
         ipDialog.destroy()
 
@@ -84,17 +95,15 @@ def handler_set_colour(label, btn_num):
         colour2 = rgb(temp_colour[0][0], temp_colour[0][1], temp_colour[0][2])
         helper_modify_label(label, colour2)
 
-def handler_submit(cmdStr):
-    send(colour1, colour2, cmdStr, com_ip, com_port)
+def handler_submit(cmdStr, sclval):
+    send(colour1, colour2, cmdStr, com_ip, com_port, sclval)
     pass
-
 
 #   OPEN_IP
 #   
 #   Opens the IP settings Dialog
 #
 #   window: the top level window
-
 def open_IP(window):
     ipDialog = tk.Toplevel(window)
     ipDialog.iconbitmap(BITMAP)
@@ -141,22 +150,6 @@ def main():
     frame_modeselect = tk.Frame(master=window, width=(WIDTH/2), height=(HEIGHT/2),bg="#00bb00")
     frame_modeselect.grid(row=0,column=0)
     
-    modeSelect = tk.StringVar(master=frame_modeselect)
-    modeSelect.set("off")
-
-    for text, mode in MODES:
-        b = tk.Radiobutton( master=frame_modeselect, 
-                            text=text, 
-                            variable=modeSelect, 
-                            value=mode, 
-                            bg=BGCOLOR, 
-                            indicatoron=0, 
-                            fg=FGCOLOR, 
-                            selectcolor=SLCOLOR,
-                            width="12"
-                            )
-        b.pack(anchor='center')
-
     #   INITIALIZE MODE OPTIONS
     frame_option = tk.Frame(master=window, width=(WIDTH/2), height=HEIGHT/2, bg=BGCOLOR)
     frame_option.grid(row=1,column=0)
@@ -170,6 +163,39 @@ def main():
     frame_colorchooser.grid(row=0, column=1)
 
 
+    modeSelect = tk.StringVar(master=frame_modeselect)
+    modeSelect.set("off")
+
+    scl_scale = tk.Scale(master=frame_option, from_=1, to=100, orient='horizontal', length=250, width=25, bg=BGCOLOR, fg=FGCOLOR, troughcolor=BGCOLOR, label='Speed')
+
+    for text, mode in MODES:
+        if(mode == 'gradient'):
+            b = tk.Radiobutton( master=frame_modeselect, 
+                            text=text, 
+                            variable=modeSelect, 
+                            value=mode, 
+                            bg=BGCOLOR, 
+                            indicatoron=0, 
+                            fg=FGCOLOR, 
+                            selectcolor=SLCOLOR,
+                            width="12",
+                            command=lambda:handler_create_scaleable(scl_scale)
+                            )
+        else:
+            b = tk.Radiobutton( master=frame_modeselect, 
+                            text=text, 
+                            variable=modeSelect, 
+                            value=mode, 
+                            bg=BGCOLOR, 
+                            indicatoron=0, 
+                            fg=FGCOLOR, 
+                            selectcolor=SLCOLOR,
+                            width="12",
+                            command=lambda:handler_destroy_scaleable(scl_scale)
+                            )
+        b.pack(anchor='center')
+
+    
     lbl_currentColour1 = tk.Label(master=frame_colorchooser, width=8)
     btn_setColour = tk.Button(
         master=frame_colorchooser,
@@ -192,15 +218,12 @@ def main():
     btn_setColour2.place(anchor='center', relx=0.6, rely=0.6)
 
 
-
     btn_saveConfig = tk.Button(
         master=frame_cButtons,
         text="Save Config",
         command=lambda:handler_save_config(modeSelect)
     )
     btn_saveConfig.place(relx=0.2, rely=0.9, anchor="s", width=80)
-
-
 
     btn_setIP = tk.Button(
         master=frame_cButtons,
@@ -212,7 +235,7 @@ def main():
     btn_submit = tk.Button(
         master=frame_cButtons,
         text="Submit",
-        command=lambda:handler_submit(modeSelect.get())
+        command=lambda:handler_submit(modeSelect.get(), scl_scale.get())
     )
     btn_submit.place(relx=0.8, rely=0.9, anchor="s", width=80)
 
