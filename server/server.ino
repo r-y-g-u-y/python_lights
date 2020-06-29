@@ -60,6 +60,38 @@ void handle_led_off()
   strip.show()
 }
 
+void handle_led_gradient(s_light *command)
+{
+  RgbColor rgbcolor1(command->red_1, command->green_1, command->blue_1);
+  RgbColor rgbcolor2(command->red_2, command->green_2, command->blue_2);
+  HslColor hslcolor1(rgbcolor1);
+  HslColor hslcolor2(rgbcolor2);
+  unsigned char speed = command->speed;
+  unsigned char reversed = 0;
+  while(!Udp.parsePacket()){
+    
+    for(int i=0; i<=100; i++)
+    {
+      if(!reversed)
+      {
+        HslColor currColor = HslColor::LinearBlend<NeoHueBlendShortestDistance>(hslcolor1, hslcolor2, (float)(i)/100.0f);
+      }
+      else
+      {
+        HslColor currColor = HslColor::LinearBlend<NeoHueBlendShortestDistance>(hslcolor1, hslcolor2, 1.0f- ((float)(i)/100.0f));
+      }
+      
+      for(int j=0; j<PixelCount; j++)
+      {
+        strip.SetPixelColor(j, currColor);
+      }
+      strip.show();
+      delay((int)((DELAY_MAX / (float)speed) + 0.5f))
+    }
+    reversed = !reversed;
+  }
+}
+
 
 
 void setup()

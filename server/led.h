@@ -9,14 +9,22 @@ extern "C"{
 #define CMD_SOLID       0x01
 #define CMD_GRADIENT    0x02
 
+//.5 sec
+#define DELAY_MIN       5
+
+//5 sec
+#define DELAY_MAX       50f
+
 typedef struct leds{
+    unsigned char     command;
     unsigned char     red_1;
     unsigned char     green_1;
     unsigned char     blue_1;
     unsigned char     red_2;
     unsigned char     green_2;
     unsigned char     blue_2;
-    unsigned char     command;
+    unsigned char     speed;
+    
 } s_light;
 
 void init_light_struct(char* command, s_light* dest);
